@@ -18,6 +18,8 @@ class Personnage:
 
         print("%s a infligé %i dégats a %s" % (self.nom, degats, Ennemi.nom))
 
+        return degats
+
 
 class Bandit(Personnage):
 
@@ -63,7 +65,7 @@ class Joueur(Personnage):
         #Fonction testant si le mouvement est possible
 
     def Inventaire(self):
-        #Fonction affichant inventaire
+        #Fonction affichant inventaire hors combat
 
     def Combat(self, Ennemi):
         #Fonction simulant un combat
@@ -72,28 +74,28 @@ class Joueur(Personnage):
         while (self.etat = 'combat'):
             if (self.agilite > Ennemi.agilite):
 
-                self.Tour_Joueur
-                self.Tour_Ennemi                                   
+                self.Tour_Joueur()
+                Ennemi.Tour()                                  
 
             else :
 
-                self.Tour_Ennemi
-                self.Tour_Joueur
+                Ennemi.Tour()
+                self.Tour_Joueur()
 
     def Tour_Joueur(self):
 
          print("Attaquer \n Sorts \n Inventaire \n Etat \n Fuite")
         Choix=input("> ")
         if(Choix=='Attaquer'):
-            self.Attaquer
+            self.Attaquer()
         elif(Choix=='Sorts'):
-            self.sorts
+            self.sorts()
         elif(Choix=='Inventaire'):
-            self.Inventaire
+            self.Inventaire()
         elif(Choix=='Etat'):
-            self.Etat
+            self.Etat()
         elif(Choix=='Fuite'):
-            self.fuite
+            self.fuite()
         else :
             print("%s ne comprend pas la suggestion" % (self.nom))
 
@@ -109,8 +111,12 @@ class Joueur(Personnage):
     def Fuite(self):
         #Fonction de test de fuite
 
-    def Inventaire_combat(self)
+    def Inventaire_combat(self):
         #Fonction affichant l'inventaire
+
+    def Etat(self):
+        #Fonction affichant les pv / mana / etc ...
 
 def init_Carte():
     #Fonction initialisation carte
+
