@@ -120,3 +120,5 @@ class Joueur(Personnage):
 def init_Carte():
     #Fonction initialisation carte
 
+def Menu():
+    #Fonction affichant un menu vace ses différentes options (nouvelle partie ...)
