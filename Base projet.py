@@ -69,7 +69,7 @@ class Bandit(Personnage):
             marcel.etat='mort'
 
 
-class slime(Personnage):
+class Loup(Personnage):
 
     def __init__(self, Joueur):
         Personnage.__init__(self)
@@ -169,21 +169,171 @@ class Joueur(Personnage):
 
     def Etat(self):
         #Fonction affichant les pv / mana / etc ...
-        pass
+    
+        print("pv : %i/%i \nPosition : %s" % (self.vie, self.vie_max, self.position))
 
     def Victoire(self, Ennemie):
 
         pass
 
+    def Aide(self):
+        print(Commandes.keys())
 
-def init_Carte():
-    #Fonction initialisation carte
-    pass
+    def Quitter(self):
+        #Quitte le jeu
 
+        print("Apres une longue aventure %s decide rentrer chez lui, pas de chance il trébuche sur un rocher et meurt sur le coup" % self.nom)
+        self.vie=0
 
+    def Repos(self):
 
-J1=Joueur()
-Ennemi1=Bandit(J1)
-J1.etat = 'combat'
-while(J1.vie > 0 and Ennemi1.vie > 0):
-    J1.Combat(Ennemi1)
+        print("%s se repose" % self.nom)
+        if self.vie < self.vie_max :
+            print('%s se sent revigoré apres un peu de repos' % self.nom)
+            self.vie = self.vie_max
+        else :
+            print("%s s'est reposé mais ne se sent pas plus en forme" % self.nom)
+
+    def Exploration(self):
+        #Fonction de déplacement dans le monde 
+
+        mouvementEffectue = False
+        while mouvementEffectue != True :
+            print("Dans quelle direction ? \n Haut, Bas, Gauche, Droite") #Haut=1, Bas=2, Gauche=3, Droite=4
+            TestDirection = input("> ")
+            if TestDirection == ('haut' or 'Haut'):
+                if testMouvementPossible(self.position[0],self.position[1],1) :
+                    #self.positionPrecedente = self.position
+                    self.position[1] -= 1
+                    mouvementEffectue=True
+                else :
+                    print("Impossible d'aller dans cette direction")
+            elif TestDirection == ('bas' or 'Bas') :
+                if testMouvementPossible(self.position[0],self.position[1],2) :
+                    #self.positionPrecedente = self.position
+                    self.position[1] += 1
+                    mouvementEffectue=True
+                else :
+                    print("Impossible d'aller dans cette direction")
+            elif TestDirection == ('gauche' or 'Gauche') :
+                if testMouvementPossible(self.position[0],self.position[1],3) :
+                    #self.positionPrecedente = self.position
+                    self.position[0] -= 1 
+                    mouvementEffectue=True
+                else :
+                    print("Impossible d'aller dans cette direction")
+            elif TestDirection == ('droite' or 'Droite') :
+                if testMouvementPossible(self.position[0],self.position[1],4) :
+                    #self.positionPrecedente = self.position
+                    self.position[0] += 1
+                    mouvementEffectue=True
+                else :
+                    print("Impossible d'aller dans cette direction")
+            else :
+                print("%s ne comprend pas dans quelle direction il doit aller" % self.nom)
+
+        if Map[self.position[0]][self.position[1]] == 1 :
+            self.etat='combat'
+            if randint(0,1) :
+                self.ennemie = Bandit(self)
+            else :
+                self.ennemie = Loup(self)
+            self.Combat()
+        elif Map[self.position[0]][self.position[1]] == 2 :
+            self.Evenement()
+        elif Map[self.position[0]][self.position[1]] == 3 :
+            self.Donjon()
+        else :
+            print("%s s'avance plus profondément dans la foret mais rien ne se passe" % self.nom)
+
+def testMouvementPossible(positionX, positionY, direction):
+
+     # Fonction de test qui renvoie True ou False en fonction de si le moucement choisi est possible
+
+    if direction ==1:
+
+        if positionY - 1 < 0:
+            return False
+        else:
+            return True
+
+    elif direction ==2 :
+
+        if positionY + 1 >len(Map[positionX]):
+            return False
+        else:
+            return True
+
+    elif direction ==3 :
+
+        if positionX-1 <0:
+            return False
+        else :
+            return True
+
+    else:
+
+        if positionX+1 >len(Map):
+            return False
+        else :
+            return True
+
+def initialisation_map():    # Fonction d'intialisation de la map avec les endroits clé
+
+    # Declaration de la map vide
+
+    liste = []
+    i=0
+    while i< 4:
+        liste.append([0] * 4)
+        i+=1
+
+    # Remplissage de la map --> 0 = rien / 1 = combat / 2 = Evenement / 3 = Donjon ;)
+
+    liste[0][0]=0
+    liste[0][1]=1
+    liste[0][2]=1  
+    liste[0][3]=2
+    liste[1][0]=0
+    liste[1][1]=1
+    liste[1][2]=2
+    liste[1][3]=1
+    liste[2][0]=1
+    liste[2][1]=0
+    liste[2][2]=1
+    liste[2][3]=1
+    liste[3][0]=0
+    liste[3][1]=2
+    liste[3][2]=3
+    liste[3][3]=1
+
+    return liste
+
+Commandes = {
+    'etat' : Joueur.Etat,
+    'reposer' : Joueur.Repos,
+    'explorer' : Joueur.Exploration,
+    #'fuite' : Joueur.Fuite,
+    #'attaquer' : Joueur.Attaque,
+    'quitter' : Joueur.Quitter,
+    'aide' : Joueur.Aide
+}
+
+J1 = Joueur()
+Map = initialisation_map()
+J1.nom = input("Quel est votre nom ? ")
+print("Tapez 'aide' pour avoir une liste des commandes disponibles")
+print("%s s'avance dans une foret sombre en quete d'aventures" % J1.nom)
+
+while(J1.vie > 0):
+    ligne = input("> ")
+    arg = ligne.split()
+    if len(arg) > 0:
+        CommandeCheck = False
+        for c in Commandes.keys() :
+            if arg[0] == c[:len(arg[0])] :
+                Commandes[c](J1)
+                CommandeCheck = True
+                break
+        if not CommandeCheck :
+            print("%s ne comprend pas la suggestion" % J1.nom)
