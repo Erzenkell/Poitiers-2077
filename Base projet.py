@@ -1,13 +1,12 @@
 from random import *
 
-""" j'ai fait ça """
-
 class Objet:
 
     def __init__(self):
         self.Utilisable_combat = True
         self.Quantité = 0
         self.nom = nom
+
 
 class Potion(Objet):
 
@@ -19,13 +18,6 @@ class Potion(Objet):
         if (joueur.vie > joueur.vie_max) :
             joueur.vie=joueur.vie_max
 
-class Epee_en_fer(Objet):
-
-    def __init__(self):
-        self.Utilisable_combat = False
-        self.nom = "Epee en fer"
-        self.attaque = 1
-
 
 class Personnage:
 
@@ -36,11 +28,12 @@ class Personnage:
         self.vie_max=0
         self.force=0
         self.agilite=0
-        self.mana=0
-        self.mana_max=0
 
     def jet_degat(self, ennemie):
-        degats=min(randint(0, 6+self.force),ennemie.vie)
+
+        #Fonction retournant le calcul du jet de dégats de "self" sur "ennemie"
+
+        degats=self.force
         ennemie.vie -= degats
         if degats == 0 :
             print("%s esquive l'attaque" % ennemie.nom)
@@ -51,22 +44,20 @@ class Personnage:
 
 class Bandit(Personnage):
 
-    def __init__(self, Joueur):
+    def __init__(self, joueur):
         Personnage.__init__(self)
         self.nom="un Bandit"
-        self.niveau= randint(1, Joueur.niveau)
-        self.vie_max = randint(10, Joueur.niveau+10)
+        self.niveau= randint(1, joueur.niveau)
+        self.vie_max = randint(10, joueur.niveau+10)
         self.vie=self.vie_max
         self.force=self.niveau
         self.agilite=self.niveau
 
-    def Tour(self, marcel):
+    def Tour(self, joueur):
 
-        degats=self.jet_degat(marcel)
-        marcel.vie -= degats
-        if (marcel.vie < 0):
-            print("T'es mort cheh")
-            marcel.etat='mort'
+        if (self.vie > 0):
+            degats=self.jet_degat(joueur)
+            joueur.vie -= degats
 
 
 class Loup(Personnage):
@@ -83,28 +74,14 @@ class Joueur(Personnage):
         self.nom="marcel"
         self.vie_max=12
         self.vie=12
-        self.force=1
+        self.force=2
         self.agilite=1
-        self.mana_max=10
-        self.mana=10
         self.position = [1,1]
         self.etat='normal'
-        
-        self.inventaire = []
 
-        self.sorts = {}
-        self.sorts["boule de feu"] = [True, 2, 10]
-        self.sorts["eclair"] = [1,6]
-
-
-
-    def Exploration(self):
-        #Fonction de déplacement
-        pass
-
-    def TestMouvement(self):
-        #Fonction testant si le mouvement est possible
-        pass
+        self.inventaire = {}
+        self.inventaire["Grenade"] = [3]
+        self.inventaire["zeubi"] = [1]
 
     def Inventaire(self):
         #Fonction affichant inventaire hors combat
@@ -112,42 +89,53 @@ class Joueur(Personnage):
 
     def Combat(self, Ennemi):
         #Fonction simulant un combat
+
+        print("%s se retrouve face a face avec %s" % (self.nom, Ennemi.nom ))
         
         while (self.etat == 'combat'):
-            if (self.agilite >= Ennemi.agilite):
 
+            if (self.agilite >= Ennemi.agilite):
                 self.Tour_Joueur(Ennemi)
                 Ennemi.Tour(self)    
+                self.test_victoire(Ennemi)
 
             else :
-
                 Ennemi.Tour(self)
                 self.Tour_Joueur(Ennemi)
+                self.test_victoire(Ennemi)
+
+    def test_victoire(self, Ennemi):
+
+        if (Ennemi.vie < 0) :
+            print("gg ta gagné")
+            self.etat='normal'
+
+        elif  (self.vie < 0) :
+            print("gg t mort")
+            self.etat='mort'
 
     def Tour_Joueur(self,Ennemi):
 
-        print("Attaquer \nSorts \nInventaire \nEtat \nFuite")
-        Choix=input("> ")
-        if(Choix=='Attaquer'):
-            self.Attaquer(Ennemi)
-        elif(Choix=='Sorts'):
-            self.sorts()
-        elif(Choix=='Inventaire'):
-            self.Inventaire()
-        elif(Choix=='Etat'):
-            self.Etat()
-        elif(Choix=='Fuite'):
-            self.fuite()
-        else :
-            print("%s ne comprend pas la suggestion" % (self.nom))
+        if (self.vie > 0):
+            print("Attaquer \nSorts \nInventaire \nEtat \nFuite")
+            Choix=input("> ")
+            if(Choix=='Attaquer'):
+                self.Attaquer(Ennemi)
+            elif(Choix=='Sorts'):
+                self.sorts()
+            elif(Choix=='Inventaire'):
+                self.Inventaire()
+            elif(Choix=='Etat'):
+                self.Etat()
+            elif(Choix=='Fuite'):
+                self.fuite()
+            else :
+                print("%s ne comprend pas la suggestion" % (self.nom))
 
     def Attaquer(self,Ennemi):
 
         degats=self.jet_degat(Ennemi)
         Ennemi.vie -= degats       
-        if(Ennemi.vie < 0):
-            #self.victoire(Ennemi)
-            self.etat='normal'   
 
     def Sorts(self):
 
@@ -157,7 +145,6 @@ class Joueur(Personnage):
         #faire les dégats
 
         pass
-
 
     def Fuite(self):
         #Fonction de test de fuite
@@ -171,10 +158,6 @@ class Joueur(Personnage):
         #Fonction affichant les pv / mana / etc ...
     
         print("pv : %i/%i \nPosition : %s" % (self.vie, self.vie_max, self.position))
-
-    def Victoire(self, Ennemie):
-
-        pass
 
     def Aide(self):
         print(Commandes.keys())
@@ -234,17 +217,19 @@ class Joueur(Personnage):
 
         if Map[self.position[0]][self.position[1]] == 1 :
             self.etat='combat'
-            if randint(0,1) :
-                self.ennemie = Bandit(self)
-            else :
-                self.ennemie = Loup(self)
-            self.Combat()
+            self.Combat(Bandit(self))
+
         elif Map[self.position[0]][self.position[1]] == 2 :
-            self.Evenement()
+            #self.Evenement()
+            pass
+
         elif Map[self.position[0]][self.position[1]] == 3 :
-            self.Donjon()
+            #self.Donjon()
+            pass
+
         else :
             print("%s s'avance plus profondément dans la foret mais rien ne se passe" % self.nom)
+
 
 def testMouvementPossible(positionX, positionY, direction):
 
@@ -316,7 +301,8 @@ Commandes = {
     #'fuite' : Joueur.Fuite,
     #'attaquer' : Joueur.Attaque,
     'quitter' : Joueur.Quitter,
-    'aide' : Joueur.Aide
+    'aide' : Joueur.Aide,
+    #'examiner' : Joueur.examiner
 }
 
 J1 = Joueur()
@@ -337,3 +323,4 @@ while(J1.vie > 0):
                 break
         if not CommandeCheck :
             print("%s ne comprend pas la suggestion" % J1.nom)
+
