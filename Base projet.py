@@ -35,7 +35,7 @@ class Personnage:
 
         #Fonction retournant le calcul du jet de dégats de "self" sur "ennemie"
 
-        degats=self.attaque-ennemie.defense
+        degats=self.attaque
         ennemie.vie -= degats
         if degats == 0 :
             print("%s esquive l'attaque" % ennemie.nom)
@@ -61,14 +61,6 @@ class Bandit(Personnage):
 
         if (self.vie > 0):
             degats=self.jet_degat(joueur)
-            joueur.vie -= degats
-
-
-class Loup(Personnage):
-
-    def __init__(self, Joueur):
-        Personnage.__init__(self)
-        self.nom="un slime de mort"
 
 
 class Joueur(Personnage):
@@ -78,12 +70,14 @@ class Joueur(Personnage):
         self.nom="marcel"
         self.vie_max=12
         self.vie=12
-        self.force=2
+        self.force=3
         self.attaque=self.force
         self.agilite=1
         self.position = [1,1]
         self.etat='normal'
         self.defense=0
+        self.xp=0
+        self.xp_max=10
 
         self.inventaire = {}
         self.inventaire["Grenade"] = [3]
@@ -112,9 +106,20 @@ class Joueur(Personnage):
 
     def test_victoire(self, Ennemi):
 
+        #Fonction de test si le joueur ou son ennemi a gagné + gain de niveau
+
         if (Ennemi.vie < 0) :
-            print("gg ta gagné")
+            print("%s a vaincu %s" % (self.nom, Ennemi.nom))
             self.xp += Ennemi.gain_xp
+            if (self.xp == self.xp_max):
+                print("%s se sent plus fort" % (self.nom))
+                self.xp = 0
+                self.xp_max += 1
+                self.niveau += 1
+                self.force += 1
+                self.agilite += 1
+                self.vie_max += 1
+                self.vie = self.vie_max
             self.etat='normal'
 
         elif  (self.vie < 0) :
@@ -123,24 +128,25 @@ class Joueur(Personnage):
 
     def Tour_Joueur(self,Ennemi):
 
+        #Fonction simulant le tour du joueur
+
         if (self.vie > 0):
             print("Attaquer \nSorts \nInventaire \nEtat \nFuite")
-            Choix=input("> ")
-            if(Choix=='Attaquer'):
+            Choix=input("> ").lower()
+            if (Choix.isnumeric() and int(Choix) == 1) or (not Choix.isnumeric() and Choix== 'attaquer'): 
                 self.Attaquer(Ennemi)
-            elif(Choix=='Inventaire'):
+            elif (Choix.isnumeric() and int(Choix) == 2) or (not Choix.isnumeric() and Choix== 'inventaire'): 
                 self.Inventaire()
-            elif(Choix=='Etat'):
+            elif (Choix.isnumeric() and int(Choix) == 3) or (not Choix.isnumeric() and Choix== 'etat'): 
                 self.Etat()
-            elif(Choix=='Fuite'):
+            elif (Choix.isnumeric() and int(Choix) == 4) or (not Choix.isnumeric() and Choix== 'fuite'): 
                 self.fuite()
             else :
                 print("%s ne comprend pas la suggestion" % (self.nom))
 
     def Attaquer(self,Ennemi):
 
-        degats=self.jet_degat(Ennemi)
-        Ennemi.vie -= degats       
+        self.jet_degat(Ennemi)    
 
     def Fuite(self):
         #Fonction de test de fuite
@@ -179,29 +185,29 @@ class Joueur(Personnage):
         mouvementEffectue = False
         while mouvementEffectue != True :
             print("Dans quelle direction ? \n Haut, Bas, Gauche, Droite") #Haut=1, Bas=2, Gauche=3, Droite=4
-            TestDirection = input("> ")
-            if TestDirection == ('haut' or 'Haut'):
+            TestDirection = input("> ").lower()
+            if TestDirection == 'haut':
                 if testMouvementPossible(self.position[0],self.position[1],1) :
                     #self.positionPrecedente = self.position
                     self.position[1] -= 1
                     mouvementEffectue=True
                 else :
                     print("Impossible d'aller dans cette direction")
-            elif TestDirection == ('bas' or 'Bas') :
+            elif TestDirection == 'bas':
                 if testMouvementPossible(self.position[0],self.position[1],2) :
                     #self.positionPrecedente = self.position
                     self.position[1] += 1
                     mouvementEffectue=True
                 else :
                     print("Impossible d'aller dans cette direction")
-            elif TestDirection == ('gauche' or 'Gauche') :
+            elif TestDirection == 'gauche' :
                 if testMouvementPossible(self.position[0],self.position[1],3) :
                     #self.positionPrecedente = self.position
                     self.position[0] -= 1 
                     mouvementEffectue=True
                 else :
                     print("Impossible d'aller dans cette direction")
-            elif TestDirection == ('droite' or 'Droite') :
+            elif TestDirection == 'droite'  :
                 if testMouvementPossible(self.position[0],self.position[1],4) :
                     #self.positionPrecedente = self.position
                     self.position[0] += 1
@@ -311,7 +317,7 @@ def Jeu():
 
     print("Au loin, entre les débris des autres immeubles écroulés vous parvenez à distinguer une personne aussi haute que 3 pommes, elle se fait agresser par un bandit, elle à l’air en danger, souhaitez vous l’aider? (oui/non)")
 
-    Q1_intro = input("> ")
+    Q1_intro = input("> ").lower()
 
     if(Q1_intro == 'oui'):
 
@@ -321,16 +327,16 @@ def Jeu():
         Q2_intro="canard"        
         while (Q2_intro != 'oui'):
 
-            Q2_intro=input("Voulez vous l'aider ? (oui/non) : ")
+            Q2_intro=input("Voulez vous l'aider ? (oui/non) : ").lower()
             if (Q2_intro != 'oui'):
                 print("Pourquoi tu ne veux pas pas m'aider ? **Elle vous attache à un arbre** Ecoute, je me suis fait dérober un vaccin qui pourra sauver l'humanité, j'ai besoin d'une personne qui pourra m'aider à retrouver ce vaccin, je sais déjà qui est la personne qui m'a volé, son nom est 'choumeurt' tant que tu ne voudras pas m'aider je te laisserai attaché là et un bandit viendra te dépouiller ou peut être les loups.. qui sait ! Ahahaha.")
 
-        print("Quoi, tu veux m'aider à sauver l'humanité ? Bon, c'est vrai que j'aurai peut être besoin de toi, une personne qui fonce dans le tas sans réfléchir, ça peut servir.\nBon alors, je me suis fait dérober par un certain 'choumeurt', ouais c'est son nom, un vaccin capable de sauver l'humanité, il faut qu'on le retrouve à tout prix !\nOn va commencer par partir receuillir des infomrations sur ce mec")
+        print("Quoi, tu veux m'aider à sauver l'humanité ? Bon, c'est vrai que j'aurai peut être besoin de toi, une personne qui fonce dans le tas sans réfléchir, ça peut servir.\nBon alors, je me suis fait dérober par un certain 'choumeurt', ouais c'est son nom, un vaccin capable de sauver l'humanité, il faut qu'on le retrouve à tout prix !\nOn va commencer par partir receuillir des informations sur ce mec")
 
         print("Tapez 'aide' pour avoir une liste des commandes disponibles")
 
         while(J1.vie > 0):
-            ligne = input("> ")
+            ligne = input("> ").lower()
             arg = ligne.split()
             if len(arg) > 0:
                 CommandeCheck = False
@@ -346,6 +352,32 @@ def Jeu():
 
         print("Vous décidez que c'est pas votre probleme et retournez vous coucher")
 
+def Menu():
+
+  print("1. Jouer")
+  print("2. Charger")
+  print("3. Credits")
+
+  reponse = input("> ").lower()
+
+  if (reponse.isnumeric() and int(reponse) == 1) or \
+      (not reponse.isnumeric() and reponse== 'jouer'):
+          Jeu()
+
+  elif (reponse.isnumeric() and int(reponse) == 3) or \
+      (not reponse.isnumeric() and reponse== 'credits'):
+    print("By Alexandre Thibord")
+    print("Théo Wizman")
+    print("Sammy Ferrier")
+    
+  elif (reponse.isnumeric() and int(reponse) == 2) or \
+      (not reponse.isnumeric() and reponse== 'sauvegarde'):
+      #charger()
+      pass
+
+  else:
+    print("Veuillez vérifier votre orthographe ou choisir un numéro valide")
+
 J1 = Joueur()
 Map = initialisation_map()
-Jeu()
+Menu()
