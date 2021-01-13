@@ -3,20 +3,20 @@ from random import *
 class Objet:
 
     def __init__(self):
-        self.Utilisable_combat = True
+        self.Utilisable_combat = False
         self.Quantité = 0
         self.nom = nom
 
 
-class Potion(Objet):
+class Grenade(Objet):
 
     def __init__(self):
-        self.nom = 'Potion de vie'
+        self.nom = 'Grenade'
+        self.Utilisable_combat = True
+        self.Quantité = 0
 
-    def Effet(self, joueur):
-        joueur.vie += 10
-        if (joueur.vie > joueur.vie_max) :
-            joueur.vie=joueur.vie_max
+    def Effet(self, ennemie):
+        ennemie.vie -= 10   
 
 
 class Personnage:
@@ -28,18 +28,19 @@ class Personnage:
         self.vie_max=0
         self.force=0
         self.agilite=0
+        self.attaque=0
+        self.defense=0
 
     def jet_degat(self, ennemie):
 
         #Fonction retournant le calcul du jet de dégats de "self" sur "ennemie"
 
-        degats=self.force
+        degats=self.attaque-ennemie.defense
         ennemie.vie -= degats
         if degats == 0 :
             print("%s esquive l'attaque" % ennemie.nom)
         else :
             print("%s inflige %i dégats à %s" % (self.nom, degats, ennemie.nom))
-        return degats
 
 
 class Bandit(Personnage):
@@ -51,7 +52,10 @@ class Bandit(Personnage):
         self.vie_max = randint(10, joueur.niveau+10)
         self.vie=self.vie_max
         self.force=self.niveau
+        self.attaque=self.force
         self.agilite=self.niveau
+        self.gain_xp=self.niveau
+        self.defense=1
 
     def Tour(self, joueur):
 
@@ -75,9 +79,11 @@ class Joueur(Personnage):
         self.vie_max=12
         self.vie=12
         self.force=2
+        self.attaque=self.force
         self.agilite=1
         self.position = [1,1]
         self.etat='normal'
+        self.defense=0
 
         self.inventaire = {}
         self.inventaire["Grenade"] = [3]
@@ -108,6 +114,7 @@ class Joueur(Personnage):
 
         if (Ennemi.vie < 0) :
             print("gg ta gagné")
+            self.xp += Ennemi.gain_xp
             self.etat='normal'
 
         elif  (self.vie < 0) :
@@ -121,8 +128,6 @@ class Joueur(Personnage):
             Choix=input("> ")
             if(Choix=='Attaquer'):
                 self.Attaquer(Ennemi)
-            elif(Choix=='Sorts'):
-                self.sorts()
             elif(Choix=='Inventaire'):
                 self.Inventaire()
             elif(Choix=='Etat'):
@@ -136,15 +141,6 @@ class Joueur(Personnage):
 
         degats=self.jet_degat(Ennemi)
         Ennemi.vie -= degats       
-
-    def Sorts(self):
-
-        #Afficher sorts
-        #Demander le choix
-        #vérifier si on le mana
-        #faire les dégats
-
-        pass
 
     def Fuite(self):
         #Fonction de test de fuite
@@ -305,22 +301,51 @@ Commandes = {
     #'examiner' : Joueur.examiner
 }
 
+def Jeu():
+
+    J1.nom = input("Quel est votre nom ? ")
+
+    print("il y a peu, un virus mondial a décimé la moitié de la planète à cause d'un gars qui a mangé un écureuil ou un truc comme ça, aucun vaccin n’a été retrouvé et 80% des chercheurs sont morts. Ce monde est apocalyptique, il vous sera difficile de survivre seul.")
+
+    print("Vous vous réveillez d’une longue sieste, vous regarder votre journal de poche electroconnecté, il indique 3 février 2077,  position : ville MonQ, vous vous levez et ouvrez la fenêtre..")
+
+    print("Au loin, entre les débris des autres immeubles écroulés vous parvenez à distinguer une personne aussi haute que 3 pommes, elle se fait agresser par un bandit, elle à l’air en danger, souhaitez vous l’aider? (oui/non)")
+
+    Q1_intro = input("> ")
+
+    if(Q1_intro == 'oui'):
+
+        J1.etat='combat'
+        J1.Combat(Bandit(J1))
+        print("Dialogue apres combat")
+        Q2_intro="canard"        
+        while (Q2_intro != 'oui'):
+
+            Q2_intro=input("Voulez vous l'aider ? (oui/non) : ")
+            if (Q2_intro != 'oui'):
+                print("Pourquoi tu ne veux pas pas m'aider ? **Elle vous attache à un arbre** Ecoute, je me suis fait dérober un vaccin qui pourra sauver l'humanité, j'ai besoin d'une personne qui pourra m'aider à retrouver ce vaccin, je sais déjà qui est la personne qui m'a volé, son nom est 'choumeurt' tant que tu ne voudras pas m'aider je te laisserai attaché là et un bandit viendra te dépouiller ou peut être les loups.. qui sait ! Ahahaha.")
+
+        print("Quoi, tu veux m'aider à sauver l'humanité ? Bon, c'est vrai que j'aurai peut être besoin de toi, une personne qui fonce dans le tas sans réfléchir, ça peut servir.\nBon alors, je me suis fait dérober par un certain 'choumeurt', ouais c'est son nom, un vaccin capable de sauver l'humanité, il faut qu'on le retrouve à tout prix !\nOn va commencer par partir receuillir des infomrations sur ce mec")
+
+        print("Tapez 'aide' pour avoir une liste des commandes disponibles")
+
+        while(J1.vie > 0):
+            ligne = input("> ")
+            arg = ligne.split()
+            if len(arg) > 0:
+                CommandeCheck = False
+                for c in Commandes.keys() :
+                    if arg[0] == c[:len(arg[0])] :
+                        Commandes[c](J1)
+                        CommandeCheck = True
+                        break
+                if not CommandeCheck :
+                    print("%s ne comprend pas la suggestion" % J1.nom)
+
+    else : 
+
+        print("Vous décidez que c'est pas votre probleme et retournez vous coucher")
+
 J1 = Joueur()
 Map = initialisation_map()
-J1.nom = input("Quel est votre nom ? ")
-print("Tapez 'aide' pour avoir une liste des commandes disponibles")
-print("%s s'avance dans une foret sombre en quete d'aventures" % J1.nom)
-
-while(J1.vie > 0):
-    ligne = input("> ")
-    arg = ligne.split()
-    if len(arg) > 0:
-        CommandeCheck = False
-        for c in Commandes.keys() :
-            if arg[0] == c[:len(arg[0])] :
-                Commandes[c](J1)
-                CommandeCheck = True
-                break
-        if not CommandeCheck :
-            print("%s ne comprend pas la suggestion" % J1.nom)
-
+Jeu()
