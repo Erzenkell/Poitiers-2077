@@ -1,3 +1,6 @@
 # Projet-Pouicthon
 
-lore : https://docs.google.com/document/d/1S6z-cXrc_TIQZmif6ADfknm16zPfd-gbCK-LbcWSrB0/edit
+Executer main.py pour lancer le jeu
+
+ost : https://www.youtube.com/watch?v=MBIKBy_B24o
+brontriste : https://www.youtube.com/watch?v=_amuu7ekAPM
