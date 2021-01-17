@@ -1,4 +1,4 @@
-# Projet-Pouicthon
+# Poitiers 2077
 
 Executer main.py pour lancer le jeu
 
